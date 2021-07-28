@@ -2,7 +2,7 @@
 
 #PBS -N weak
 #PBS -l select=2:node_type=rome:mpiprocs=128
-#PBS -l walltime=00:20:00
+#PBS -l walltime=00:02:00
 
 
 SGPP_DIR=/lustre/hpe/ws10/ws10.1/ws/ipvpolli-test/DisCoTec/
@@ -30,7 +30,8 @@ mpiprocs=$((ngroup*nprocs+1))
 
 
 # General
-mpirun -n "$mpiprocs" omplace -vv -ht spread -c 0-127:bs=128+st=128 ./combi_example $paramfile
+mpirun -n "$mpiprocs" omplace -v -ht spread -c 0-127:bs=128+st=128 ./xthi
+mpirun -n "$mpiprocs" omplace -v -ht spread -c 0-127:bs=128+st=128 ./combi_example $paramfile
 # Use for debugging
 #mpirun -n "$mpiprocs" xterm -hold -e gdb -ex run --args ./combi_example $paramfile
 
