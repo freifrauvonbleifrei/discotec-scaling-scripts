@@ -3,7 +3,7 @@
 SGPP_DIR=/lustre/hpe/ws10/ws10.1/ws/ipvpolli-test/DisCoTec/
 EXECUTABLE=${SGPP_DIR}/distributedcombigrid/examples/distributed_third_level/combi_example
 NNODESSYSTEM=128
-WALLTIME="00:10:00"
+WALLTIME="00:40:00"
 
 paramfile="ctparam"
 # allows to read the parameter file from the arguments.
@@ -12,9 +12,11 @@ if [ $# -ge 1 ] ; then
    paramfile=$1
 fi
 
+ncombi=12
+
 runfile="run.sh"
 
-for i in {7..7}; do
+for i in {1..7}; do # consider doing {1..14} -> up to 16384 procs/PG
 	TWO_TO_I=$((2 ** i))
 	echo $TWO_TO_I
 	FOLDER=weak_$TWO_TO_I
@@ -23,6 +25,7 @@ for i in {7..7}; do
 	# executable symlink to new directory
 	cd $FOLDER
 	ln -s $EXECUTABLE
+	ln -s ../xthi
 	cd -
 
 	# copy parameter file to new directory
@@ -32,8 +35,10 @@ for i in {7..7}; do
 	
 	ADD_ARRAY=(0 0 0 0 0 0)
 	#TODO this works only for weak scaling
-	lmin=(2 2 2 2 2 2)
-        lmax=(7 7 7 7 7 7)
+	lmin=(2 2 2 2 2 1)
+        lmax=(7 7 7 7 7 6)
+	#lmin=(3 3 3 3 3 3)
+        #lmax=(8 8 8 8 8 8)
         p=(1 1 1 1 1 1)
 
 	for (( j=0; j<$i; j++ )) do
@@ -49,8 +54,8 @@ for i in {7..7}; do
 	lmin=${lmin[@]}
 	lmax=${lmax[@]}
 	leval=(3 3 3 3 3 3)
+	leval=${leval[@]}
 	p=${p[@]}
-	ncombi=2
 	ngroup=1
 	nprocs=$TWO_TO_I
 

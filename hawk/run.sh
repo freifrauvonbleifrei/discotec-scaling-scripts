@@ -30,7 +30,7 @@ mpiprocs=$((ngroup*nprocs+1))
 
 
 # General
-mpirun -n "$mpiprocs" omplace -v -ht spread -c 0-127:bs=128+st=128 ./xthi
+#mpirun -n "$mpiprocs" omplace -v -ht spread -c 0-127:bs=128+st=128 ./xthi
 mpirun -n "$mpiprocs" omplace -v -ht spread -c 0-127:bs=128+st=128 ./combi_example $paramfile
 # Use for debugging
 #mpirun -n "$mpiprocs" xterm -hold -e gdb -ex run --args ./combi_example $paramfile
