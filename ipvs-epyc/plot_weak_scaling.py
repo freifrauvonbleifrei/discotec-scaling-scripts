@@ -71,6 +71,16 @@ def color_pool(proc):
                 color_map[event] = next(color_cycler)
     return color_map
 
+def color_pool_from_event_list(events):
+    """assigns a specific color to each event
+    """
+    color_cycler = cycle(color_list)
+    color_map = {}
+    for event in events:
+        if event not in color_map:
+            color_map[event] = next(color_cycler)
+    return color_map
+
 def bar_plot_worker_group_managers(times, colors):
     """plots the average times of the process groups
     """
@@ -90,14 +100,16 @@ def bar_plot_worker_group_managers(times, colors):
         xticks.append(offset + len(times[t]) - 1)
         xlables.append(t)
         for i in times[t]:
-            ax.bar(offset, np.mean(times[t][i]), 2, color=colors[i],
-                   edgecolor="black", linewidth=1,
-                   yerr=np.std(times[t][i]),
-                   label=i if i not in labels else "_nolegend_",
-                   error_kw=dict(elinewidth=1,ecolor='black',
-                                 capsize=2,capthick=1))
-            labels.add(i)
-            offset += 2
+            # only add the events that have colors
+            if i in colors:
+                ax.bar(offset, np.mean(times[t][i]), 2, color=colors[i],
+                    edgecolor="black", linewidth=1,
+                    yerr=np.std(times[t][i]),
+                    label=i if i not in labels else "_nolegend_",
+                    error_kw=dict(elinewidth=1,ecolor='black',
+                                    capsize=2,capthick=1))
+                labels.add(i)
+                offset += 2
         offset += 8
         group += 1
 
@@ -123,6 +135,15 @@ def get_num_workers_per_group(proc):
         data = "rank" + str(rank)
     return num_workers
 
+def get_num_runfirst_rank0(proc):
+    num_run_first = 0
+    rank = 0
+    data = "rank" + str(rank)
+    for i in proc[data]["events"]:
+        if (i == "worker run first"):
+            num_run_first += len(proc[data]["events"][i])
+    assert (num_run_first > 0)
+    return num_run_first
 
 def get_rank0_times_from_json(procs):
     times = {}
@@ -135,19 +156,34 @@ def get_rank0_times_from_json(procs):
             assert bool(int(proc[data]["attributes"]["group_manager"]))
             numWorkersPerGroup = get_num_workers_per_group(proc)
             times[numWorkersPerGroup] = {}
+            num_tasks = get_num_runfirst_rank0(proc)
+            num_worker_run = 0
+            time_run_all = 0.
+            times[numWorkersPerGroup]["run all tasks"] = []
             for i in proc[data]["events"]:
-                # if i == "worker run":
-
                 if i not in times[numWorkersPerGroup]:
                     times[numWorkersPerGroup][i] = []
                 for j in proc[data]["events"][i]:
-                    times[numWorkersPerGroup][i].append(j[1] - j[0])
+                    duration = j[1] - j[0]
+                    times[numWorkersPerGroup][i].append(duration)
+                    if i == "worker run":
+                        num_worker_run += 1
+                        time_run_all += duration
+                        # every time we have n_tasks "worker run" events,
+                        # add a new duration for "run all tasks"
+                        if (num_worker_run % num_tasks == 0):
+                            times[numWorkersPerGroup]["run all tasks"].append(time_run_all)
+                            time_run_all = 0
+
+            assert (num_worker_run > 0)
+            assert (num_worker_run % num_tasks == 0)
+            assert (len(times[numWorkersPerGroup]["run all tasks"]) == len(times[numWorkersPerGroup]["combine"]) - 1)
+            print(num_worker_run, num_tasks)
         except Exception as err:
             raise RuntimeError("rank " + str(rank) +
                             " is missing attribute " + str(err))
     times_sorted = {}
     for i in sorted(times):
-        print(i)
         times_sorted[i]=times[i]
     return times_sorted
 
@@ -173,7 +209,8 @@ times = get_rank0_times_from_json(proc)
 
 # print(times[-1])
 print(len(times))
-colors = color_pool(proc[0])
+# colors = color_pool(proc[0])
+colors = color_pool_from_event_list(["combine", "run all tasks"])
 
 bar_plot_worker_group_managers(times, colors)
 
