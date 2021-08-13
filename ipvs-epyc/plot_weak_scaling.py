@@ -71,18 +71,16 @@ def color_pool(proc):
                 color_map[event] = next(color_cycler)
     return color_map
 
-def bar_plot_worker_group_managers(timeslist, colors):
+def bar_plot_worker_group_managers(times, colors):
     """plots the average times of the process groups
     """
     labels = set()
 
     fig, ax = plt.subplots()
-    ax.set_xlabel('process group')
+    ax.set_xlabel('process group size')
     ax.set_ylabel('time (s)')
     ax.grid(True)
     ax.set_axisbelow(True)
-
-    times = timeslist[0]
 
     xticks = []
     xlables = []
@@ -90,7 +88,7 @@ def bar_plot_worker_group_managers(timeslist, colors):
     group = 0
     for t in times:
         xticks.append(offset + len(times[t]) - 1)
-        xlables.append(group)
+        xlables.append(t)
         for i in times[t]:
             ax.bar(offset, np.mean(times[t][i]), 2, color=colors[i],
                    edgecolor="black", linewidth=1,
@@ -127,60 +125,57 @@ def get_num_workers_per_group(proc):
 
 
 def get_rank0_times_from_json(procs):
-    timeslist = []
+    times = {}
     for p in range(len(procs)):
-        times = {}
-        rank = 0
         proc = procs[p]
         try:
-            for i in range(1):
-                data = "rank" + str(i)
-                group = int(proc[data]["attributes"]["group"])
-                assert bool(int(proc[data]["attributes"]["group_manager"]))
-                numWorkersPerGroup = get_num_workers_per_group(proc)
-                times[numWorkersPerGroup] = {}
-                for i in proc[data]["events"]:
-                    # if i == "worker run":
+            rank = 0
+            data = "rank" + str(rank)
+            group = int(proc[data]["attributes"]["group"])
+            assert bool(int(proc[data]["attributes"]["group_manager"]))
+            numWorkersPerGroup = get_num_workers_per_group(proc)
+            times[numWorkersPerGroup] = {}
+            for i in proc[data]["events"]:
+                # if i == "worker run":
 
-                    if i not in times[numWorkersPerGroup]:
-                        times[numWorkersPerGroup][i] = []
-                    for j in proc[data]["events"][i]:
-                        times[numWorkersPerGroup][i].append(j[1] - j[0])
+                if i not in times[numWorkersPerGroup]:
+                    times[numWorkersPerGroup][i] = []
+                for j in proc[data]["events"][i]:
+                    times[numWorkersPerGroup][i].append(j[1] - j[0])
         except Exception as err:
             raise RuntimeError("rank " + str(rank) +
                             " is missing attribute " + str(err))
-        timeslist.append(times)
+    times_sorted = {}
+    for i in sorted(times):
+        print(i)
+        times_sorted[i]=times[i]
+    return times_sorted
 
-    return timeslist
+# if len(sys.argv) == 1:
+#     raise RuntimeError("no input file specified")
+# if len(sys.argv) > 2:
+#     raise RuntimeError("too many command line arguments")
 
-try:
-    # if len(sys.argv) == 1:
-    #     raise RuntimeError("no input file specified")
-    # if len(sys.argv) > 2:
-    #     raise RuntimeError("too many command line arguments")
+# all timers.json files are passed as input
+proc = [ json.load(open(sys.argv[i]))  for i in range(1, len(sys.argv))]
 
-    # all timers.json files are passed as input
-    proc = [ json.load(open(sys.argv[i]))  for i in range(1, len(sys.argv))]
+print(len(proc))
 
-    print(len(proc))
+# print("Choose type of plot:")
+# print("1 (timeline all processes),")
+# print("2 (timeline group managers),")
+# print("3 (average time all processes),")
+# print("4 (max total-times of all processes),")
+# print("5 (average time process groups)")
+# plot_type = int(input("\n"))
 
-    # print("Choose type of plot:")
-    # print("1 (timeline all processes),")
-    # print("2 (timeline group managers),")
-    # print("3 (average time all processes),")
-    # print("4 (max total-times of all processes),")
-    # print("5 (average time process groups)")
-    # plot_type = int(input("\n"))
+times = get_rank0_times_from_json(proc)
 
-    times = get_rank0_times_from_json(proc)
+# print(times[-1])
+print(len(times))
+colors = color_pool(proc[0])
 
-    print(times[-1])
-    print(len(times))
-    colors = color_pool(proc[0])
+bar_plot_worker_group_managers(times, colors)
 
-    bar_plot_worker_group_managers(times, colors)
-
-    plt.tight_layout()
-    plt.show()
-except Exception as err:
-    print("Error: " + str(err))
+plt.tight_layout()
+plt.show()
