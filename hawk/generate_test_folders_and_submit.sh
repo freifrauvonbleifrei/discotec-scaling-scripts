@@ -16,7 +16,7 @@ ncombi=12
 
 runfile="run.sh"
 
-for i in {1..7}; do # consider doing {1..14} -> up to 16384 procs/PG
+for i in {0..7}; do # consider doing {0..14} -> up to 16384 procs/PG
 	TWO_TO_I=$((2 ** i))
 	echo $TWO_TO_I
 	FOLDER=weak_$TWO_TO_I
@@ -79,8 +79,10 @@ for i in {1..7}; do # consider doing {1..14} -> up to 16384 procs/PG
 	MPIPROCS=$((ngroup*nprocs+1))
 	(( NNODES=(MPIPROCS+NNODESSYSTEM-1)/NNODESSYSTEM ))
 	
+	##PBS -N weak
 	#PBS -l select=2:node_type=rome:mpiprocs=128
 	#PBS -l walltime=00:02:00
+        sed -i "s/#PBS -N .*/#PBS -N $FOLDER/g" $runfile
 	sed -i "s/#PBS -l walltime=.*/#PBS -l walltime=$WALLTIME/g" $runfile
 	sed -i "s/#PBS -l select=.*/#PBS -l select=$NNODES:node_type=rome:mpiprocs=128/g" $runfile
 	
