@@ -81,7 +81,7 @@ def color_pool_from_event_list(events):
             color_map[event] = next(color_cycler)
     return color_map
 
-def bar_plot_worker_group_managers(times, colors):
+def bar_plot_worker_group_managers(times, colors, stacked = False):
     """plots the average times of the process groups
     """
     labels = set()
@@ -97,19 +97,27 @@ def bar_plot_worker_group_managers(times, colors):
     offset = 0
     group = 0
     for t in times:
-        xticks.append(offset + len(times[t]) - 1)
+        if (stacked):
+            xticks.append(offset)
+        else:
+            xticks.append(offset + len(colors) - 1)
         xlables.append(t)
+        bottommean = None
         for i in times[t]:
             # only add the events that have colors
             if i in colors:
                 ax.bar(offset, np.mean(times[t][i]), 2, color=colors[i],
+                    bottom=bottommean,
                     edgecolor="black", linewidth=1,
                     yerr=np.std(times[t][i]),
                     label=i if i not in labels else "_nolegend_",
                     error_kw=dict(elinewidth=1,ecolor='black',
                                     capsize=2,capthick=1))
+                if (stacked):
+                    bottommean = np.mean(times[t][i])
+                else:
+                    offset += 2
                 labels.add(i)
-                offset += 2
         offset += 8
         group += 1
 
@@ -212,7 +220,7 @@ print(len(times))
 # colors = color_pool(proc[0])
 colors = color_pool_from_event_list(["combine", "run all tasks"])
 
-bar_plot_worker_group_managers(times, colors)
+bar_plot_worker_group_managers(times, colors, True)
 
 plt.tight_layout()
 plt.show()
