@@ -96,6 +96,7 @@ def bar_plot_worker_group_managers(times, colors, stacked = False):
     xlables = []
     offset = 0
     group = 0
+    print("process group size, event, mean, std")
     for t in times:
         if (stacked):
             xticks.append(offset)
@@ -106,13 +107,17 @@ def bar_plot_worker_group_managers(times, colors, stacked = False):
         for i in times[t]:
             # only add the events that have colors
             if i in colors:
-                ax.bar(offset, np.mean(times[t][i]), 2, color=colors[i],
+                mean = np.mean(times[t][i])
+                std = np.std(times[t][i])
+                ax.bar(offset, mean, 2, color=colors[i],
                     bottom=bottommean,
                     edgecolor="black", linewidth=1,
-                    yerr=np.std(times[t][i]),
+                    yerr=std,
                     label=i if i not in labels else "_nolegend_",
                     error_kw=dict(elinewidth=1,ecolor='black',
                                     capsize=2,capthick=1))
+                # print the data that went into this plot
+                print(t, i, mean, std)
                 if (stacked):
                     bottommean = np.mean(times[t][i])
                 else:
