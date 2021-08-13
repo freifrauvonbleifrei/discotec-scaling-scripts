@@ -187,14 +187,20 @@ def get_rank0_times_from_json(procs):
                         if (num_worker_run % num_tasks == 0):
                             times[numWorkersPerGroup]["run all tasks"].append(time_run_all)
                             time_run_all = 0
+                # remove first combination, because it makes weird things happen on NG
+                # remove last combination, as it might have used more subspaces
+                if i == "combine":
+                    times[numWorkersPerGroup][i] = times[numWorkersPerGroup][i][1:-1]
 
             assert (num_worker_run > 0)
             assert (num_worker_run % num_tasks == 0)
-            assert (len(times[numWorkersPerGroup]["run all tasks"]) == len(times[numWorkersPerGroup]["combine"]) - 1)
-            print(num_worker_run, num_tasks)
+            # print (len(times[numWorkersPerGroup]["run all tasks"]), len(times[numWorkersPerGroup]["combine"]))
+            assert (len(times[numWorkersPerGroup]["run all tasks"]) == len(times[numWorkersPerGroup]["combine"]) +1)
+            # print(num_worker_run, num_tasks)
         except Exception as err:
-            raise RuntimeError("rank " + str(rank) +
-                            " is missing attribute " + str(err))
+            raise err
+            # raise RuntimeError("rank " + str(rank) +
+            #                 " is missing attribute " + str(err))
     times_sorted = {}
     for i in sorted(times):
         times_sorted[i]=times[i]
@@ -208,7 +214,6 @@ def get_rank0_times_from_json(procs):
 # all timers.json files are passed as input
 proc = [ json.load(open(sys.argv[i]))  for i in range(1, len(sys.argv))]
 
-print(len(proc))
 
 # print("Choose type of plot:")
 # print("1 (timeline all processes),")
@@ -220,10 +225,9 @@ print(len(proc))
 
 times = get_rank0_times_from_json(proc)
 
-# print(times[-1])
-print(len(times))
 # colors = color_pool(proc[0])
 colors = color_pool_from_event_list(["combine", "run all tasks"])
+# colors = color_pool_from_event_list(["combine"])
 
 bar_plot_worker_group_managers(times, colors, True)
 
