@@ -117,7 +117,7 @@ def bar_plot_worker_group_managers(times, colors, stacked = False):
                     error_kw=dict(elinewidth=1,ecolor='black',
                                     capsize=2,capthick=1))
                 # print the data that went into this plot
-                print(t, i, mean, std)
+                print(t, ",", i, ",", mean, ",", std)
                 if (stacked):
                     bottommean = np.mean(times[t][i])
                 else:
@@ -158,16 +158,22 @@ def get_num_runfirst_rank0(proc):
     assert (num_run_first > 0)
     return num_run_first
 
-def get_rank0_times_from_json(procs):
+
+# use 0 for the process group and -1 for the manager times
+def get_rank_times_from_json(procs, rank_passed=0):
     times = {}
     for p in range(len(procs)):
         proc = procs[p]
         try:
-            rank = 0
+            if rank_passed == -1:
+                rank = len(proc) - 1
+            else:
+                rank = rank_passed
             data = "rank" + str(rank)
             group = int(proc[data]["attributes"]["group"])
             assert bool(int(proc[data]["attributes"]["group_manager"]))
             numWorkersPerGroup = get_num_workers_per_group(proc)
+            print("num workers", numWorkersPerGroup)
             times[numWorkersPerGroup] = {}
             num_tasks = get_num_runfirst_rank0(proc)
             num_worker_run = 0
@@ -189,13 +195,14 @@ def get_rank0_times_from_json(procs):
                             time_run_all = 0
                 # remove first combination, because it makes weird things happen on NG
                 # remove last combination, as it might have used more subspaces
-                if i == "combine":
+                if i == "combine" or i == "manager combine":
                     times[numWorkersPerGroup][i] = times[numWorkersPerGroup][i][1:-1]
-
-            assert (num_worker_run > 0)
-            assert (num_worker_run % num_tasks == 0)
-            # print (len(times[numWorkersPerGroup]["run all tasks"]), len(times[numWorkersPerGroup]["combine"]))
-            assert (len(times[numWorkersPerGroup]["run all tasks"]) == len(times[numWorkersPerGroup]["combine"]) +1)
+            if (rank < len(proc)-1):
+                assert (num_worker_run > 0)
+                assert (num_worker_run % num_tasks == 0)
+                # print (len(times[numWorkersPerGroup]["run all tasks"]), len(times[numWorkersPerGroup]["combine"]))
+                assert (len(times[numWorkersPerGroup]["run all tasks"]) == len(
+                    times[numWorkersPerGroup]["combine"]) + 1)
             # print(num_worker_run, num_tasks)
         except Exception as err:
             raise err
@@ -214,7 +221,6 @@ def get_rank0_times_from_json(procs):
 # all timers.json files are passed as input
 proc = [ json.load(open(sys.argv[i]))  for i in range(1, len(sys.argv))]
 
-
 # print("Choose type of plot:")
 # print("1 (timeline all processes),")
 # print("2 (timeline group managers),")
@@ -223,10 +229,11 @@ proc = [ json.load(open(sys.argv[i]))  for i in range(1, len(sys.argv))]
 # print("5 (average time process groups)")
 # plot_type = int(input("\n"))
 
-times = get_rank0_times_from_json(proc)
+times = get_rank_times_from_json(proc, 0)
 
 # colors = color_pool(proc[0])
 colors = color_pool_from_event_list(["combine", "run all tasks"])
+# colors = color_pool_from_event_list(["manager combine", "manager run"])
 # colors = color_pool_from_event_list(["combine"])
 
 bar_plot_worker_group_managers(times, colors, True)
