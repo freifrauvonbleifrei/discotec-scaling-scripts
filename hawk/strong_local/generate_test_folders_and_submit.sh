@@ -3,7 +3,7 @@
 SGPP_DIR=/lustre/hpe/ws10/ws10.1/ws/ipvpolli-test/DisCoTec/
 EXECUTABLE=${SGPP_DIR}/distributedcombigrid/examples/distributed_third_level/combi_example
 NNODESSYSTEM=128
-WALLTIME="01:40:00"
+WALLTIME="00:40:00"
 
 paramfile="ctparam"
 # allows to read the parameter file from the arguments.
@@ -12,17 +12,17 @@ if [ $# -ge 1 ] ; then
    paramfile=$1
 fi
 
-ncombi=12
+ncombi=1
 
 runfile="run.sh"
 
 
-for i in {2..8}; do # number of process groups (up to 2^8 / 256) 
+for i in {1..8}; do # number of process groups (up to 2^8 / 256) 
 	s=5 # process group size is 32
 	TWO_TO_I=$((2 ** i))
 	TWO_TO_S=$((2 ** s))
 	echo $TWO_TO_I
-	FOLDER=strong_$TWO_TO_I
+	FOLDER=taskassignment_strong_$TWO_TO_I
 	mkdir $FOLDER
 
 	# executable symlink to new directory
