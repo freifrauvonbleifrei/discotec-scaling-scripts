@@ -12,14 +12,17 @@ if [ $# -ge 1 ] ; then
    paramfile=$1
 fi
 
-ncombi=12
+ncombi=1
 
 runfile="run.sh"
 
-for i in {0..7}; do # consider doing {0..14} -> up to 16384 procs/PG
+
+for i in {1..8}; do # number of process groups (up to 2^8 / 256) 
+	s=5 # process group size is 32
 	TWO_TO_I=$((2 ** i))
+	TWO_TO_S=$((2 ** s))
 	echo $TWO_TO_I
-	FOLDER=weak_$TWO_TO_I
+	FOLDER=taskassignment_strong_$TWO_TO_I
 	mkdir $FOLDER
 
 	# executable symlink to new directory
@@ -41,7 +44,7 @@ for i in {0..7}; do # consider doing {0..14} -> up to 16384 procs/PG
         #lmax=(8 8 8 8 8 8)
         p=(1 1 1 1 1 1)
 
-	for (( j=0; j<$i; j++ )) do
+	for (( j=0; j<$s; j++ )) do
 		# echo ADD_ARRAY ${ADD_ARRAY[@]}
 		k=$(( 5 - ($j  % 6) ))
 		ADD_ARRAY[$k]=$((ADD_ARRAY[$k] + 1))
@@ -56,8 +59,8 @@ for i in {0..7}; do # consider doing {0..14} -> up to 16384 procs/PG
 	leval=(3 3 3 3 3 3)
 	leval=${leval[@]}
 	p=${p[@]}
-	ngroup=1
-	nprocs=$TWO_TO_I
+	ngroup=$TWO_TO_I
+	nprocs=$TWO_TO_S
 
 	sed -i "s/lmin.*/lmin = $lmin/g" $paramfile
         sed -i "s/lmax.*/lmax = $lmax/g" $paramfile
