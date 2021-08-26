@@ -1,0 +1,16 @@
+[ct]
+dim = 6
+lmin = 2 3 3 3 3 2
+lmax = 7 8 8 8 8 7
+leval = 3 3 3 3 3 3
+p = 1 2 2 2 2 2
+ncombi = 1000
+
+[application]
+dt = 1e-3
+nsteps = 1
+mcerror = 1
+
+[manager]
+ngroup = 32
+nprocs = 32
