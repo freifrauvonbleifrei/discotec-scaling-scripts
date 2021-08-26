@@ -172,7 +172,8 @@ def get_times_from_json(procs, ranks_to_get_times_from=[]):
             # add the one remote process group
             numGroups += 1
         # print(numGroups, get_master_ranks(proc))
-        times[numGroups] = {}
+        if numGroups not in times:
+            times[numGroups] = {}
         times[numGroups]["run all tasks"] = []
         if ranks_to_get_times_from == []:
             ranks = get_master_ranks(proc)
@@ -250,14 +251,14 @@ proc = [ json.load(open(sys.argv[i]))  for i in range(1, len(sys.argv))]
 # print("5 (average time process groups)")
 # plot_type = int(input("\n"))
 
-try:
-    times = get_times_from_json(proc)
-    colors = color_pool_from_event_list(["combine", "run all tasks"])
-except KeyError as e:
-    # if there was no "combine" event, use manager rank
-    times = get_times_from_json(proc, [-1])
-    # print(times)
-    colors = color_pool_from_event_list(["manager combine", "manager run"])
+# try:
+#     times = get_times_from_json(proc)
+#     colors = color_pool_from_event_list(["combine", "run all tasks"])
+# except KeyError as e:
+# if there was no "combine" event, use manager rank
+times = get_times_from_json(proc, [-1])
+# print(times)
+colors = color_pool_from_event_list(["manager combine", "manager run"])
 
 # colors = color_pool(proc[0])
 # colors = color_pool_from_event_list(["combine"])

@@ -14,6 +14,7 @@
 #SBATCH --no-requeue
 #Setup of execution environment
 #SBATCH --export=NONE 
+#SBATCH --exclusive
 
 #Number of nodes and MPI tasks per node:
 #SBATCH --ntasks=
