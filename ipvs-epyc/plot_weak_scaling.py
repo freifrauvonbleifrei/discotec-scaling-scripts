@@ -137,6 +137,13 @@ def bar_plot_worker_group_managers(times, colors, stacked = False):
     ticks_y = ticker.FuncFormatter(lambda y, pos: "{0:g}".format(y/scale_y))
     ax.yaxis.set_major_formatter(ticks_y)
 
+def print_mean_std(times):
+    for t in times:
+        for i in times[t]:
+            mean = np.mean(times[t][i])
+            std = np.std(times[t][i])
+            print(t, ",", i, ",", mean, ",", std)
+
 def get_num_workers_per_group(proc):
     group = int(proc["rank0"]["attributes"]["group"])
     num_workers = 0
@@ -212,31 +219,33 @@ def get_rank_times_from_json(procs, rank_passed=0):
     for i in sorted(times):
         times_sorted[i]=times[i]
     return times_sorted
-
-# if len(sys.argv) == 1:
-#     raise RuntimeError("no input file specified")
-# if len(sys.argv) > 2:
-#     raise RuntimeError("too many command line arguments")
-
-# all timers.json files are passed as input
-proc = [ json.load(open(sys.argv[i]))  for i in range(1, len(sys.argv))]
-
-# print("Choose type of plot:")
-# print("1 (timeline all processes),")
-# print("2 (timeline group managers),")
-# print("3 (average time all processes),")
-# print("4 (max total-times of all processes),")
-# print("5 (average time process groups)")
-# plot_type = int(input("\n"))
-
-times = get_rank_times_from_json(proc, 0)
-
-# colors = color_pool(proc[0])
-colors = color_pool_from_event_list(["combine", "run all tasks"])
-# colors = color_pool_from_event_list(["manager combine", "manager run"])
-# colors = color_pool_from_event_list(["combine"])
-
-bar_plot_worker_group_managers(times, colors, True)
-
-plt.tight_layout()
-plt.show()
+if __name__ == "__main__":
+    # if len(sys.argv) == 1:
+    #     raise RuntimeError("no input file specified")
+    # if len(sys.argv) > 2:
+    #     raise RuntimeError("too many command line arguments")
+    
+    # all timers.json files are passed as input
+    proc = [ json.load(open(sys.argv[i]))  for i in range(1, len(sys.argv))]
+    
+    # print("Choose type of plot:")
+    # print("1 (timeline all processes),")
+    # print("2 (timeline group managers),")
+    # print("3 (average time all processes),")
+    # print("4 (max total-times of all processes),")
+    # print("5 (average time process groups)")
+    # plot_type = int(input("\n"))
+    
+    times = get_rank_times_from_json(proc, 0)
+    
+    # colors = color_pool(proc[0])
+    colors = color_pool_from_event_list(["combine", "run all tasks"])
+    # colors = color_pool_from_event_list(["manager combine", "manager run"])
+    # colors = color_pool_from_event_list(["combine"])
+    
+    print_mean_std(times)
+    
+    bar_plot_worker_group_managers(times, colors, True)
+    
+    plt.tight_layout()
+    plt.show()
