@@ -1,6 +1,6 @@
 #!/bin/bash
 # Job Name and Files (also --job-name)
-#SBATCH -J weak
+#SBATCH -J strong_wide
 #Output and error (also --output, --error):
 #SBATCH -o ./%x.%j.out
 #SBATCH -e ./%x.%j.err
@@ -10,14 +10,14 @@
 ##SBATCH --mail-type=END
 ##SBATCH --mail-user=insert_your_email_here
 # Wall clock limit:
-#SBATCH --time=00:20:00
+#SBATCH --time=02:40:00
 #SBATCH --no-requeue
 #Setup of execution environment
 #SBATCH --export=NONE 
 #SBATCH --exclusive
 
 #Number of nodes and MPI tasks per node:
-#SBATCH --ntasks=
+#SBATCH --ntasks=33
 
 ##fixed frequency, no dynamic adjustment
 ###SBATCH --ear=off
@@ -42,7 +42,7 @@ spack load boost@1.74.0
 # Change to the direcotry that the job was submitted from
 # cd $PBS_O_WORKDIR
 
-paramfile="ctparam"
+paramfile="ctparam_tl_system1"
 # allows to read the parameter file from the arguments.
 # Useful for testing the third level combination on a single system
 if [ $# -ge 1 ] ; then

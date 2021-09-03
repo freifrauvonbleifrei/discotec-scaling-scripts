@@ -3,7 +3,7 @@
 SGPP_DIR=/home/pollinta/epyc/DisCoTec/
 EXECUTABLE=${SGPP_DIR}/distributedcombigrid/examples/distributed_third_level/combi_example
 NNODESSYSTEM=128
-WALLTIME="00:40:00"
+WALLTIME="01:40:00"
 
 paramfile="ctparam"
 # allows to read the parameter file from the arguments.
@@ -12,14 +12,14 @@ if [ $# -ge 1 ] ; then
    paramfile=$1
 fi
 
-ncombi=1
+ncombi=12
 
 runfile="run.sh"
 
 for i in {0..7}; do # consider doing {0..14} -> up to 16384 procs/PG
 	TWO_TO_I=$((2 ** i))
 	echo $TWO_TO_I
-	FOLDER=strong_singlegrid__$TWO_TO_I
+	FOLDER=weak_$TWO_TO_I
 	mkdir $FOLDER
 
 	# executable symlink to new directory
@@ -35,8 +35,8 @@ for i in {0..7}; do # consider doing {0..14} -> up to 16384 procs/PG
 	
 	ADD_ARRAY=(0 0 0 0 0 0)
 	#TODO this works only for weak scaling
-	lmin=(2 2 2 2 2 2)
-        lmax=(2 2 2 2 2 2)
+	lmin=(2 2 2 2 2 1)
+        lmax=(7 7 7 7 7 6)
 	#lmin=(3 3 3 3 3 3)
         #lmax=(8 8 8 8 8 8)
         p=(1 1 1 1 1 1)
@@ -45,8 +45,8 @@ for i in {0..7}; do # consider doing {0..14} -> up to 16384 procs/PG
 		# echo ADD_ARRAY ${ADD_ARRAY[@]}
 		k=$(( 5 - ($j  % 6) ))
 		ADD_ARRAY[$k]=$((ADD_ARRAY[$k] + 1))
-		#lmin[$k]=$((lmin[$k] + 1))
-		#lmax[$k]=$((lmax[$k] + 1))
+		lmin[$k]=$((lmin[$k] + 1))
+		lmax[$k]=$((lmax[$k] + 1))
 		p[$k]=$((p[$k] * 2))
 	done
 	echo ADD_ARRAY ${ADD_ARRAY[@]}
@@ -88,6 +88,7 @@ for i in {0..7}; do # consider doing {0..14} -> up to 16384 procs/PG
         #SBATCH --nodes=128
         #SBATCH --time=24:00:00
 
+	sed -i "s/#SBATCH -J .*/#SBATCH -J $FOLDER/g" $runfile
         sed -i "s/#SBATCH --time=.*/#SBATCH --time=$WALLTIME/g" $runfile
         sed -i "s/#SBATCH --nodes=.*/#SBATCH --nodes=$NNODES/g" $runfile
         sed -i "s/#SBATCH --ntasks=.*/#SBATCH --ntasks=$MPIPROCS/g" $runfile
