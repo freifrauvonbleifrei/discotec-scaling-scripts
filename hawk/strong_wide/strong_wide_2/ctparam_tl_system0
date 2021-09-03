@@ -14,7 +14,7 @@ mcerror = 0
 
 [manager]
 ngroup = 1
-nprocs = 32
+nprocs = 64
 
 [thirdLevel]
 host = localhost
