@@ -17,7 +17,7 @@
 #SBATCH --exclusive
 
 #Number of nodes and MPI tasks per node:
-#SBATCH --ntasks=33
+#SBATCH --ntasks=65
 
 ##fixed frequency, no dynamic adjustment
 ###SBATCH --ear=off
