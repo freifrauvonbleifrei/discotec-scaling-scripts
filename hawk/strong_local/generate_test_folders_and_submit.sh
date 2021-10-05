@@ -12,17 +12,17 @@ if [ $# -ge 1 ] ; then
    paramfile=$1
 fi
 
-ncombi=1
+ncombi=12
 
 runfile="run.sh"
 
 
-for i in {1..8}; do # number of process groups (up to 2^8 / 256) 
-	s=5 # process group size is 32
+for i in {1..10}; do # number of process groups (up to 2^8 / 256) 
+	s=6 # process group size is 64
 	TWO_TO_I=$((2 ** i))
 	TWO_TO_S=$((2 ** s))
 	echo $TWO_TO_I
-	FOLDER=taskassignment_strong_$TWO_TO_I
+	FOLDER=strong_l_$TWO_TO_I
 	mkdir $FOLDER
 
 	# executable symlink to new directory
@@ -37,9 +37,8 @@ for i in {1..8}; do # number of process groups (up to 2^8 / 256)
 	cd $FOLDER
 	
 	ADD_ARRAY=(0 0 0 0 0 0)
-	#TODO this works only for weak scaling
-	lmin=(2 2 2 2 2 1)
-        lmax=(7 7 7 7 7 6)
+	lmin=(2 1 1 1 1 1)
+        lmax=(9 8 8 8 8 8)
 	#lmin=(3 3 3 3 3 3)
         #lmax=(8 8 8 8 8 8)
         p=(1 1 1 1 1 1)

@@ -19,13 +19,13 @@ runfile="run.sh"
 for i in {0..7}; do # consider doing {0..14} -> up to 16384 procs/PG
 	TWO_TO_I=$((2 ** i))
 	echo $TWO_TO_I
-	FOLDER=weak_$TWO_TO_I
+	FOLDER=n7_weak_$TWO_TO_I
 	mkdir $FOLDER
 
 	# executable symlink to new directory
 	cd $FOLDER
 	ln -s $EXECUTABLE
-	ln -s ../xthi
+	#ln -s ../xthi
 	cd -
 
 	# copy parameter file to new directory
@@ -35,8 +35,8 @@ for i in {0..7}; do # consider doing {0..14} -> up to 16384 procs/PG
 	
 	ADD_ARRAY=(0 0 0 0 0 0)
 	#TODO this works only for weak scaling
-	lmin=(2 2 2 2 2 1)
-        lmax=(7 7 7 7 7 6)
+	lmin=(2 1 1 1 1 1)
+	lmax=(9 8 8 8 8 8)
 	#lmin=(3 3 3 3 3 3)
         #lmax=(8 8 8 8 8 8)
         p=(1 1 1 1 1 1)

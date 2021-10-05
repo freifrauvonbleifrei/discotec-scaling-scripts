@@ -10,6 +10,7 @@ import matplotlib.ticker as ticker
 import matplotlib.pyplot as plt
 import numpy as np
 from itertools import cycle
+from plot_weak_scaling import print_mean_std, print_maxtime, print_mintime
 
 # list of distinguishable colors, see:
 # https://graphicdesign.stackexchange.com/revisions/3815/8
@@ -87,7 +88,8 @@ def bar_plot_worker_group_managers(times, colors, stacked = False):
     labels = set()
 
     fig, ax = plt.subplots()
-    ax.set_xlabel('process group size')
+    ax.semilogy()
+    ax.set_xlabel('number of process groups')
     ax.set_ylabel('time (s)')
     ax.grid(True)
     ax.set_axisbelow(True)
@@ -96,7 +98,7 @@ def bar_plot_worker_group_managers(times, colors, stacked = False):
     xlables = []
     offset = 0
     group = 0
-    print("process group size, event, mean, std")
+    print("number of process groups, event, mean, std")
     for t in times:
         if (stacked):
             xticks.append(offset)
@@ -130,27 +132,29 @@ def bar_plot_worker_group_managers(times, colors, stacked = False):
     ax.set_xticklabels(xlables)
     ax.legend(loc=2).get_frame().set_alpha(0.75)
 
-    ax.set_ylim(ymin=0)
-
     # use seconds as unit
     scale_y = 1e6
     ticks_y = ticker.FuncFormatter(lambda y, pos: "{0:g}".format(y/scale_y))
     ax.yaxis.set_major_formatter(ticks_y)
 
-def get_num_workers_per_group(proc):
-    group = int(proc["rank0"]["attributes"]["group"])
-    num_workers = 0
-    rank = 0
-    data = "rank" + str(rank)
-    while group == int(proc[data]["attributes"]["group"]):
-        num_workers += 1
-        rank += 1
+def get_master_ranks(proc):
+    group_old = -1
+    master_ranks = []
+    # do not count the manager
+    for rank in range(len(proc) - 1):
         data = "rank" + str(rank)
-    return num_workers
+        if bool(int(proc[data]["attributes"]["group_manager"])):
+            group = int(proc[data]["attributes"]["group"])
+            assert(group > group_old)
+            group_old = group
+            master_ranks.append(rank)
+    return master_ranks
 
-def get_num_runfirst_rank0(proc):
+def get_num_groups(proc):
+    return len(get_master_ranks(proc))
+
+def get_num_runfirst(proc, rank=0):
     num_run_first = 0
-    rank = 0
     data = "rank" + str(rank)
     for i in proc[data]["events"]:
         if (i == "worker run first"):
@@ -158,51 +162,69 @@ def get_num_runfirst_rank0(proc):
     assert (num_run_first > 0)
     return num_run_first
 
-
-# use 0 for the process group and -1 for the manager times
-def get_rank_times_from_json(procs, rank_passed=0):
+def get_times_from_json(procs, ranks_to_get_times_from=[]):
     times = {}
     for p in range(len(procs)):
         proc = procs[p]
+        numGroups = get_num_groups(proc)
+        # check if this was a third-level run
+        #print(proc["rank0"]["events"])
+        if "combineThirdLevel" in proc["rank0"]["events"].keys():
+            # add the one remote process group
+            numGroups += 1
+        # print(numGroups, get_master_ranks(proc))
+        if numGroups not in times:
+            times[numGroups] = {}
+        times[numGroups]["run all tasks"] = []
+        if ranks_to_get_times_from == []:
+            ranks = get_master_ranks(proc)
+        else:
+            ranks = ranks_to_get_times_from
         try:
-            if rank_passed == -1:
-                rank = len(proc) - 1
+            for rank in ranks:
+                if rank == -1:
+                    num_tasks = 0
+                    rank = len(proc) - 1
+                else:
+                    num_tasks = get_num_runfirst(proc, rank)
+                data = "rank" + str(rank)
+                # print(data)
+                group = int(proc[data]["attributes"]["group"])
+                assert bool(int(proc[data]["attributes"]["group_manager"]))
+                num_worker_run = 0
+                time_run_all = 0.
+                for i in proc[data]["events"]:
+                    # print(i)
+                    if i not in times[numGroups]:
+                        times[numGroups][i] = []
+                    event_no=0
+                    for j in proc[data]["events"][i]:
+                        duration = j[1] - j[0]
+                        # leave out first combination, because it makes weird things happen on NG
+                        if (i != "combine" and i != "manager combine") or event_no > 0 :
+                            times[numGroups][i].append(duration)
+                        if i == "worker run":
+                            num_worker_run += 1
+                            time_run_all += duration
+                            # every time we have n_tasks "worker run" events,
+                            # add a new duration for "run all tasks"
+                            if (num_worker_run % num_tasks == 0):
+                                times[numGroups]["run all tasks"].append(time_run_all)
+                                time_run_all = 0
+                        event_no += 1
+                    # remove last combination, as it might have used more subspaces
+                    if i == "combine":
+                        times[numGroups][i] = times[numGroups][i][:-1]
+
+                if ranks_to_get_times_from != [-1]:
+                    assert (num_worker_run > 0)
+                    assert (num_worker_run % num_tasks == 0)
+            if ranks_to_get_times_from != [-1]:
+                print (len(times[numGroups]["run all tasks"]), len(times[numGroups]["combine"]))
+                assert (len(times[numGroups]["run all tasks"]) == len(times[numGroups]["combine"]) + len(ranks))
             else:
-                rank = rank_passed
-            data = "rank" + str(rank)
-            group = int(proc[data]["attributes"]["group"])
-            assert bool(int(proc[data]["attributes"]["group_manager"]))
-            numWorkersPerGroup = get_num_workers_per_group(proc)
-            print("num workers", numWorkersPerGroup)
-            times[numWorkersPerGroup] = {}
-            num_tasks = get_num_runfirst_rank0(proc)
-            num_worker_run = 0
-            time_run_all = 0.
-            times[numWorkersPerGroup]["run all tasks"] = []
-            for i in proc[data]["events"]:
-                if i not in times[numWorkersPerGroup]:
-                    times[numWorkersPerGroup][i] = []
-                for j in proc[data]["events"][i]:
-                    duration = j[1] - j[0]
-                    times[numWorkersPerGroup][i].append(duration)
-                    if i == "worker run":
-                        num_worker_run += 1
-                        time_run_all += duration
-                        # every time we have n_tasks "worker run" events,
-                        # add a new duration for "run all tasks"
-                        if (num_worker_run % num_tasks == 0):
-                            times[numWorkersPerGroup]["run all tasks"].append(time_run_all)
-                            time_run_all = 0
-                # remove first combination, because it makes weird things happen on NG
-                # remove last combination, as it might have used more subspaces
-                if i == "combine" or i == "manager combine":
-                    times[numWorkersPerGroup][i] = times[numWorkersPerGroup][i][1:-1]
-            if (rank < len(proc)-1):
-                assert (num_worker_run > 0)
-                assert (num_worker_run % num_tasks == 0)
-                # print (len(times[numWorkersPerGroup]["run all tasks"]), len(times[numWorkersPerGroup]["combine"]))
-                assert (len(times[numWorkersPerGroup]["run all tasks"]) == len(
-                    times[numWorkersPerGroup]["combine"]) + 1)
+                print (len(times[numGroups]["manager run"]), len(times[numGroups]["manager combine"]))
+            #    assert (len(times[numGroups]["manager run"]) == len(times[numGroups]["manager combine"]) + len(ranks))
             # print(num_worker_run, num_tasks)
         except Exception as err:
             raise err
@@ -213,30 +235,37 @@ def get_rank_times_from_json(procs, rank_passed=0):
         times_sorted[i]=times[i]
     return times_sorted
 
-# if len(sys.argv) == 1:
-#     raise RuntimeError("no input file specified")
-# if len(sys.argv) > 2:
-#     raise RuntimeError("too many command line arguments")
+if __name__ == "__main__":
+    # if len(sys.argv) == 1:
+    #     raise RuntimeError("no input file specified")
+    # if len(sys.argv) > 2:
+    #     raise RuntimeError("too many command line arguments")
+    
+    # all timers.json files are passed as input
+    proc = [ json.load(open(sys.argv[i]))  for i in range(1, len(sys.argv))]
+    
+    
+    # print("Choose type of plot:")
+    # print("1 (timeline all processes),")
+    # print("2 (timeline group managers),")
+    # print("3 (average time all processes),")
+    # print("4 (max total-times of all processes),")
+    # print("5 (average time process groups)")
+    # plot_type = int(input("\n"))
+    
+    # use manager rank (-1)
+    times = get_times_from_json(proc, [-1])
+    print_mean_std(times)
+    print_maxtime(times, "manager combine")
+    print_mintime(times, "manager combine")
 
-# all timers.json files are passed as input
-proc = [ json.load(open(sys.argv[i]))  for i in range(1, len(sys.argv))]
 
-# print("Choose type of plot:")
-# print("1 (timeline all processes),")
-# print("2 (timeline group managers),")
-# print("3 (average time all processes),")
-# print("4 (max total-times of all processes),")
-# print("5 (average time process groups)")
-# plot_type = int(input("\n"))
-
-times = get_rank_times_from_json(proc, 0)
-
-# colors = color_pool(proc[0])
-colors = color_pool_from_event_list(["combine", "run all tasks"])
-# colors = color_pool_from_event_list(["manager combine", "manager run"])
-# colors = color_pool_from_event_list(["combine"])
-
-bar_plot_worker_group_managers(times, colors, True)
-
-plt.tight_layout()
-plt.show()
+    # colors = color_pool(proc[0])
+    colors = color_pool_from_event_list(["combine", "run all tasks"])
+    # colors = color_pool_from_event_list(["combine"])
+    colors = color_pool_from_event_list(["manager combine", "manager run"])
+    
+    bar_plot_worker_group_managers(times, colors, True)
+    
+    plt.tight_layout()
+    plt.show()

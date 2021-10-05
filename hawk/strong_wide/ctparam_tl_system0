@@ -1,9 +1,9 @@
 [ct]
 dim = 6
-lmin = 2 3 3 3 3 2
-lmax = 7 8 8 8 8 7
+lmin = 3 2 2 2 2 2
+lmax = 10 9 9 9 9 9
 leval = 3 3 3 3 3 3
-p = 1 2 2 2 2 2
+p = 2 2 2 2 2 2
 ncombi = 12
 ctscheme = ./ctscheme_tl_system_0.json
 
@@ -14,11 +14,11 @@ mcerror = 0
 
 [manager]
 ngroup = 1
-nprocs = 1
+nprocs = 64
 
 [thirdLevel]
-#host = localhost
-host = 129.69.213.171
+host = localhost
+#host = 129.69.213.171
 port = 9999
 # counting has to start at 0, needed only for distribution of combischeme
 systemNumber = 0
