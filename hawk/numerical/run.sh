@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#PBS -N strong_32
-#PBS -l select=9:node_type=rome:mpiprocs=128
-#PBS -l walltime=05:59:00
+#PBS -N numerical
+#PBS -l select=16:node_type=rome:mpiprocs=128
+#PBS -l walltime=24:00:00
 
 
 SGPP_DIR=/lustre/hpe/ws10/ws10.1/ws/ipvpolli-test/DisCoTec/

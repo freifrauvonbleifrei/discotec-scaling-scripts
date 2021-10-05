@@ -2,7 +2,7 @@
 
 #PBS -N strong_wide_2
 #PBS -l select=1:node_type=rome:mpiprocs=128
-#PBS -l walltime=00:15:00
+#PBS -l walltime=00:17:00
 
 
 SGPP_DIR=/lustre/hpe/ws10/ws10.1/ws/ipvpolli-test/DisCoTec/
