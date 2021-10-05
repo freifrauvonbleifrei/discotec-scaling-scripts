@@ -144,6 +144,17 @@ def print_mean_std(times):
             std = np.std(times[t][i])
             print(t, ",", i, ",", mean, ",", std)
 
+def print_maxtime(times, event):
+    for t in times:        
+        maxtime = np.max(times[t][event])
+        print("maximum", t, ",", event, ",", maxtime)
+
+def print_mintime(times, event):
+    for t in times:
+        mintime = np.min(times[t][event])
+        print("minimum", t, ",", event, ",", mintime)
+
+
 def get_num_workers_per_group(proc):
     group = int(proc["rank0"]["attributes"]["group"])
     num_workers = 0

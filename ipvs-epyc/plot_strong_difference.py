@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-"""Script for outputting the average runtimes output by the stats class
-"""
-
 import sys
 import json
 import matplotlib.patches as mpatch

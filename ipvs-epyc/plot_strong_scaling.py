@@ -10,7 +10,7 @@ import matplotlib.ticker as ticker
 import matplotlib.pyplot as plt
 import numpy as np
 from itertools import cycle
-from plot_weak_scaling import print_mean_std
+from plot_weak_scaling import print_mean_std, print_maxtime, print_mintime
 
 # list of distinguishable colors, see:
 # https://graphicdesign.stackexchange.com/revisions/3815/8
@@ -168,7 +168,7 @@ def get_times_from_json(procs, ranks_to_get_times_from=[]):
         proc = procs[p]
         numGroups = get_num_groups(proc)
         # check if this was a third-level run
-        print(proc["rank0"]["events"])
+        #print(proc["rank0"]["events"])
         if "combineThirdLevel" in proc["rank0"]["events"].keys():
             # add the one remote process group
             numGroups += 1
@@ -224,7 +224,7 @@ def get_times_from_json(procs, ranks_to_get_times_from=[]):
                 assert (len(times[numGroups]["run all tasks"]) == len(times[numGroups]["combine"]) + len(ranks))
             else:
                 print (len(times[numGroups]["manager run"]), len(times[numGroups]["manager combine"]))
-                assert (len(times[numGroups]["manager run"]) == len(times[numGroups]["manager combine"]) + len(ranks))
+            #    assert (len(times[numGroups]["manager run"]) == len(times[numGroups]["manager combine"]) + len(ranks))
             # print(num_worker_run, num_tasks)
         except Exception as err:
             raise err
@@ -256,7 +256,10 @@ if __name__ == "__main__":
     # use manager rank (-1)
     times = get_times_from_json(proc, [-1])
     print_mean_std(times)
-    
+    print_maxtime(times, "manager combine")
+    print_mintime(times, "manager combine")
+
+
     # colors = color_pool(proc[0])
     colors = color_pool_from_event_list(["combine", "run all tasks"])
     # colors = color_pool_from_event_list(["combine"])
