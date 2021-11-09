@@ -3,13 +3,9 @@ module load python/3.8 # for scons
 #module load impi/19.1.2 # unnecessary -- mpt/2.23 loaded implicitly # for compiler
 module load boost/1.70.0 # for boost
 
-scons -j 8 ISGENE=0 VERBOSE=1 BOOST_INCLUDE_PATH=${BOOST_ROOT}/include BOOST_LIBRARY_PATH=${BOOST_ROOT}/lib COMPILE_BOOST_TESTS=1 RUN_BOOST_TESTS=1 RUN_CPPLINT=0 BUILD_STATICLIB=0 CC=mpicc FC=mpifort CXX=mpicxx OPT=1 TIMING=1 UNIFORMDECOMPOSITION=1 ENABLEFT=0 #DEBUG_OUTPUT=1
+scons -j 8 ISGENE=0 VERBOSE=1 BOOST_INCLUDE_PATH=${BOOST_ROOT}/include BOOST_LIBRARY_PATH=${BOOST_ROOT}/lib COMPILE_BOOST_TESTS=1 RUN_BOOST_TESTS=1 RUN_CPPLINT=0 BUILD_STATICLIB=0 CC=mpicc FC=mpifort CXX=mpicxx OPT=1 TIMING=1 UNIFORMDECOMPOSITION=1 ENABLEFT=0 ARCH=avx2 CPPFLAGS=-march=native,-O3 LINKFLAGS=-march=native,-O3 #DEBUG_OUTPUT=1
 
 export LD_LIBRARY_PATH=$(pwd)/lib/sgpp:$(pwd)/glpk/lib:$LD_LIBRARY_PATH
-
-cd distributedcombigrid/third_level_manager/
-make
-cd -
 
 cd distributedcombigrid/examples/distributed_third_level/
 make clean 
