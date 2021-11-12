@@ -3,7 +3,7 @@
 SGPP_DIR=/lustre/hpe/ws10/ws10.1/ws/ipvpolli-widely/DisCoTec-GENE/
 EXECUTABLE=${SGPP_DIR}/distributedcombigrid/examples/distributed_third_level/combi_example
 NNODESSYSTEM=128
-WALLTIME="00:40:00"
+WALLTIME="02:40:00"
 
 paramfile="ctparam"
 # allows to read the parameter file from the arguments.
@@ -16,7 +16,7 @@ ncombi=12
 
 runfile="submit.sh"
 
-for i in {4..4}; do # {4..8}; do #
+for i in {5..9}; do #
 	TWO_TO_I=$((2 ** i))
 	echo $TWO_TO_I
 	FOLDER=n5_gene_weak_$TWO_TO_I
@@ -26,20 +26,20 @@ for i in {4..4}; do # {4..8}; do #
 	cd $FOLDER
 	
 	ADD_ARRAY=(0 0 0 0)
-	#lmin=(3 5 2 2 2 1)
-	lmin=(3 2 3 2)
-	#lmax=(8 5 7 7 7 1)
-	lmax=(8 7 8 7)
+	#lmin=(3 5 2 3 2 1)
+	lmin=(3 2 3 1)
+	#lmax=(8 5 7 8 7 1)
+	lmax=(8 7 8 6)
         #p=(1 1 2 2 4 1)
-	p=(1 2 2 4)
-	lx=31.25
+	p=(1 2 4 2)
+	lx=31.25 #lx=10
 
 	for (( j=0; j<$(($i - 4)); j++ )) do
 		# echo ADD_ARRAY ${ADD_ARRAY[@]}
 		# increase right to left
 		#k=$(( 3 - ($j  % 4) ))
-		# increase left to right
-		k=$(($j % 4))
+		# increase left to right, starting at w
+		k=$((($j+3) % 4))
 		ADD_ARRAY[$k]=$((ADD_ARRAY[$k] + 1))
 		lmin[$k]=$((lmin[$k] + 1))
 		lmax[$k]=$((lmax[$k] + 1))
