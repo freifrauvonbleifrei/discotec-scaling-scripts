@@ -51,11 +51,11 @@ chptdir = './'
 read_checkpoint  = F
 write_checkpoint = T
 
-istep_field =     100
-istep_mom   =     200
-istep_nrg   =      10
+istep_field =     0
+istep_mom   =     0
+istep_nrg   =    0
 istep_vsp   =       0
-istep_schpt =    5000
+istep_schpt =    0
 /
 
 &general
