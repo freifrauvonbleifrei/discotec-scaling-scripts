@@ -221,6 +221,8 @@ def get_rank_times_from_json(procs, rank_passed=0):
                 # print (len(times[numWorkersPerGroup]["run all tasks"]), len(times[numWorkersPerGroup]["combine"]))
                 assert (len(times[numWorkersPerGroup]["run all tasks"]) == len(
                     times[numWorkersPerGroup]["combine"]) + 1)
+                # remove first run, because it may have init times
+                times[numWorkersPerGroup]["run all tasks"] = times[numWorkersPerGroup]["run all tasks"][1:-1]
             # print(num_worker_run, num_tasks)
         except Exception as err:
             raise err
