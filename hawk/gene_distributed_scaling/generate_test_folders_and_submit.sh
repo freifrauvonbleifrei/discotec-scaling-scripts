@@ -31,10 +31,10 @@ for i in {5..9}; do #
 	#lmax=(8 5 7 8 7 1)
 	lmax=(8 7 8 6)
         #p=(1 1 2 2 4 1)
-	p=(1 2 4 2)
+	p=(2 2 4 2)
 	lx=31.25 #lx=10
 
-	for (( j=0; j<$(($i - 4)); j++ )) do
+	for (( j=0; j<$(($i - 5)); j++ )) do
 		# echo ADD_ARRAY ${ADD_ARRAY[@]}
 		# increase right to left
 		#k=$(( 3 - ($j  % 4) ))
