@@ -1,26 +1,26 @@
 [ct]
 dim = 6
-lmin = 0 1 1 1 1 1 
-lmax = 17 18 18 18 18 18
+lmin = 2 2 2 2 2 2
+lmax = 19 19 19 19 19 19
 leval = 5 5 5 5 5 5
-p = 2 2 2 2 2 3
+p = 5 5 5 5 5 5
 ncombi = 10
-ctscheme = ./scheme_part2_minus_8_l.json
+ctscheme = ./scheme_part1.json
 
 [application]
 dt = 1e-6
-nsteps = 1
+nsteps = 10
 mcerror = 0
 
 [manager]
-ngroup = 19
-nprocs = 96
+ngroup = 64
+nprocs = 15625
 
 [thirdLevel]
 host = localhost
 #host = 129.69.213.171
 port = 9999
 # counting has to start at 0, needed only for distribution of combischeme
-systemNumber = 1
+systemNumber = 0
 numSystems = 2
 sshCommand = ssh -L 9999:129.69.213.171:9999 pollinta@ipvslogin.informatik.uni-stuttgart.de -nNT &

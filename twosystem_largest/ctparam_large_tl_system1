@@ -1,20 +1,20 @@
 [ct]
 dim = 6
-lmin = 0 1 1 1 1 1 
-lmax = 17 18 18 18 18 18
+lmin = 2 2 2 2 2 2
+lmax = 19 19 19 19 19 19
 leval = 5 5 5 5 5 5
-p = 2 2 2 2 2 3
+p = 5 5 5 5 5 5
 ncombi = 10
-ctscheme = ./scheme_part2_minus_8_l.json
+ctscheme = ./scheme_part2.json
 
 [application]
 dt = 1e-6
-nsteps = 1
+nsteps = 10
 mcerror = 0
 
 [manager]
 ngroup = 19
-nprocs = 96
+nprocs = 15625
 
 [thirdLevel]
 host = localhost

@@ -8,7 +8,7 @@ ncombi = 10
 ctscheme = ./scheme_part1_minus_8_l.json
 
 [application]
-dt = 1e-4
+dt = 1e-6
 nsteps = 1
 mcerror = 0
 
