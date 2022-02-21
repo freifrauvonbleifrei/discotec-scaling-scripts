@@ -3,7 +3,7 @@
 SGPP_DIR=/hppfs/work/pn34mi/di39qun2/DisCoTec-third-level/
 EXECUTABLE=${SGPP_DIR}/distributedcombigrid/examples/distributed_third_level/combi_example
 NNODESSYSTEM=48
-WALLTIME="01:50:00"
+WALLTIME="00:40:00"
 
 paramfile="ctparam"
 # allows to read the parameter file from the arguments.
@@ -16,10 +16,13 @@ ncombi=12
 
 runfile="run.sh"
 
-for i in {1..11}; do # consider doing {0..14} -> up to 16384 procs/PG
+
+for i in {2..10}; do # number of process groups (up to 2^8 / 256) 
+	s=6 # process group size is 64
 	TWO_TO_I=$((2 ** i))
+	TWO_TO_S=$((2 ** s))
 	echo $TWO_TO_I
-	FOLDER=n7_weak_$TWO_TO_I
+	FOLDER=strong_l_$TWO_TO_I
 	mkdir $FOLDER
 
 	# executable symlink to new directory
@@ -34,14 +37,13 @@ for i in {1..11}; do # consider doing {0..14} -> up to 16384 procs/PG
 	cd $FOLDER
 	
 	ADD_ARRAY=(0 0 0 0 0 0)
-	#TODO this works only for weak scaling
 	lmin=(2 1 1 1 1 1)
-  	lmax=(9 8 8 8 8 8)
+        lmax=(9 8 8 8 8 8)
 	#lmin=(3 3 3 3 3 3)
         #lmax=(8 8 8 8 8 8)
         p=(1 1 1 1 1 1)
 
-	for (( j=0; j<$i; j++ )) do
+	for (( j=0; j<$s; j++ )) do
 		# echo ADD_ARRAY ${ADD_ARRAY[@]}
 		k=$(( 5 - ($j  % 6) ))
 		ADD_ARRAY[$k]=$((ADD_ARRAY[$k] + 1))
@@ -56,8 +58,8 @@ for i in {1..11}; do # consider doing {0..14} -> up to 16384 procs/PG
 	leval=(3 3 3 3 3 3)
 	leval=${leval[@]}
 	p=${p[@]}
-	ngroup=1
-	nprocs=$TWO_TO_I
+	ngroup=$TWO_TO_I
+	nprocs=$TWO_TO_S
 
 	sed -i "s/lmin.*/lmin = $lmin/g" $paramfile
         sed -i "s/lmax.*/lmax = $lmax/g" $paramfile
@@ -74,28 +76,27 @@ for i in {1..11}; do # consider doing {0..14} -> up to 16384 procs/PG
 	
 	#replace number of nodes in submit script
 	# do not replace number of ranks, we need to have all of the node anyways
-	cp $runfile $FOLDER
         cp setenv.sh $FOLDER
+	cp $runfile $FOLDER
 	cd $FOLDER
 	MPIPROCS=$((ngroup*nprocs+1))
 	(( NNODES=(MPIPROCS+NNODESSYSTEM-1)/NNODESSYSTEM ))
 	
+	##PBS -N weak
 	#PBS -l select=2:node_type=rome:mpiprocs=128
 	#PBS -l walltime=00:02:00
+        sed -i "s/#PBS -N .*/#PBS -N $FOLDER/g" $runfile
 	sed -i "s/#PBS -l walltime=.*/#PBS -l walltime=$WALLTIME/g" $runfile
 	sed -i "s/#PBS -l select=.*/#PBS -l select=$NNODES:node_type=rome:mpiprocs=128/g" $runfile
-	
         #SBATCH --nodes=128
         #SBATCH --time=24:00:00
         sed -i "s/#SBATCH -J .*/#SBATCH -J $FOLDER/g" $runfile
         sed -i "s/#SBATCH --time=.*/#SBATCH --time=$WALLTIME/g" $runfile
-        sed -i "s/#SBATCH --nodes=.*/#SBATCH --nodes=$NNODES/g" $runfile
-
-#        sed -i "s/SGPP_DIR=.*/SGPP_DIR=$SGPP_DIR/g" $runfile
-
-	# submit
+        sed -i "s/#SBATCH --nodes=.*/#SBATCH --nodes=$NNODES/g" $runfile	
+	
+        #submit
 	echo "submit $TWO_TO_I"
-	sbatch --parsable $runfile
+        sbatch --parsable $runfile
 	
 	cd -
 done
