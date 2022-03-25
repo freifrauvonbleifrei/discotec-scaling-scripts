@@ -21,10 +21,10 @@ declare -a BasisFunctions=("hat" "biorthogonal_periodic" "fullweighting_periodic
 
 # Iterate the string array using for loop
 for basisfunction in ${BasisFunctions[@]}; do
-    for i in {0..6}; do # consider doing {0..6} 
+   for i in {2..8}; do # consider doing {1..8} 
 	TWO_TO_I=$((2 ** i))
 	echo $TWO_TO_I
-	FOLDER=strong_${TWO_TO_I}x1_${basisfunction}
+	FOLDER=strong_32x${TWO_TO_I}_${basisfunction}
 	cp -r $templatefolder $FOLDER
 
 	# executable symlink to new directory
@@ -39,14 +39,12 @@ for basisfunction in ${BasisFunctions[@]}; do
 	lmax=(6 6 6 6 6 6)
         p=(1 1 1 1 1 1)
 
-	#for (( j=0; j<$i; j++ )) do
-	#	# echo ADD_ARRAY ${ADD_ARRAY[@]}
-	#	k=$(( 5 - ($j  % 6) ))
-	#	ADD_ARRAY[$k]=$((ADD_ARRAY[$k] + 1))
-	#	lmin[$k]=$((lmin[$k] + 1))
-	#	lmax[$k]=$((lmax[$k] + 1))
-	#	p[$k]=$((p[$k] * 2))
-	#done
+	for (( j=0; j<$i; j++ )) do
+		# echo ADD_ARRAY ${ADD_ARRAY[@]}
+		k=$(( 5 - ($j  % 6) ))
+		ADD_ARRAY[$k]=$((ADD_ARRAY[$k] + 1))
+		p[$k]=$((p[$k] * 2))
+	done
 	#echo ADD_ARRAY ${ADD_ARRAY[@]}
 
 	lmin=${lmin[@]}
@@ -54,8 +52,8 @@ for basisfunction in ${BasisFunctions[@]}; do
 	leval=(3 3 3 3 3 3)
 	leval=${leval[@]}
 	p=${p[@]}
-	ngroup=$TWO_TO_I
-	nprocs=1
+	ngroup=32
+	nprocs=$TWO_TO_I
 
 	sed -i "s/lmin.*/lmin = $lmin/g" $paramfile
         sed -i "s/lmax.*/lmax = $lmax/g" $paramfile
@@ -64,18 +62,17 @@ for basisfunction in ${BasisFunctions[@]}; do
 	sed -i "s/ncombi.*/ncombi = $ncombi/g" $paramfile
 	sed -i "s/nprocs.*/nprocs = $nprocs/g" $paramfile
 	sed -i "s/ngroup.*/ngroup = $ngroup/g" $paramfile
-	sed -i "s/basis.*/basis = $basisfunction/g" $paramfile
-
-        ngroup=$(grep ngroup $paramfile | awk -F"=" '{print $2}')
-        nprocs=$(grep nprocs $paramfile | awk -F"=" '{print $2}')
-
+	sed -i "s/basis.*/basis = $basisfunction/g" $paramfile	
+	
+	ngroup=$(grep ngroup $paramfile | awk -F"=" '{print $2}')
+	nprocs=$(grep nprocs $paramfile | awk -F"=" '{print $2}')
+	
 	cd - 
 	
 	#replace number of nodes in submit script
 	# do not replace number of ranks, we need to have all of the node anyways
 	cp $runfile $FOLDER
 	cd $FOLDER
-	
 	MPIPROCS=$((ngroup*nprocs+1))
 	(( NNODES=(MPIPROCS+NNODESSYSTEM-1)/NNODESSYSTEM ))
 	
