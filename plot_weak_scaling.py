@@ -232,6 +232,7 @@ def get_rank_times_from_json(procs, rank_passed=0):
     for i in sorted(times):
         times_sorted[i]=times[i]
     return times_sorted
+
 if __name__ == "__main__":
     # if len(sys.argv) == 1:
     #     raise RuntimeError("no input file specified")
@@ -249,15 +250,17 @@ if __name__ == "__main__":
     # print("5 (average time process groups)")
     # plot_type = int(input("\n"))
     
-    times = get_rank_times_from_json(proc, 0)
+    times = get_rank_times_from_json(proc, -1)
     
     # colors = color_pool(proc[0])
     colors = color_pool_from_event_list(["combine", "run all tasks"])
-    # colors = color_pool_from_event_list(["manager combine", "manager run"])
+    colors = color_pool_from_event_list(["manager combine", "manager run"])
     # colors = color_pool_from_event_list(["combine"])
     
     print_mean_std(times)
-    
+    print_maxtime(times, "manager combine")
+    print_mintime(times, "manager combine")
+ 
     bar_plot_worker_group_managers(times, colors, True)
     
     plt.tight_layout()

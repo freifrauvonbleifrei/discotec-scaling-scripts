@@ -264,7 +264,8 @@ if __name__ == "__main__":
     colors = color_pool_from_event_list(["combine", "run all tasks"])
     # colors = color_pool_from_event_list(["combine"])
     colors = color_pool_from_event_list(["manager combine", "manager run"])
-    
+    colors = color_pool_from_event_list(["manager run"])
+
     bar_plot_worker_group_managers(times, colors, True)
     
     plt.tight_layout()
