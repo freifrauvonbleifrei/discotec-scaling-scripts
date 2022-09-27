@@ -130,7 +130,7 @@ def bar_plot_worker_group_managers(times, colors, stacked = False):
     ax.set_xticklabels(xlables)
     ax.legend(loc=2).get_frame().set_alpha(0.75)
 
-    ax.set_ylim(ymin=0)
+    ax.set_ylim(bottom=0)
 
     # use seconds as unit
     scale_y = 1e6
@@ -193,36 +193,29 @@ def get_rank_times_from_json(procs, rank_passed=0):
             numWorkersPerGroup = get_num_workers_per_group(proc)
             print("num workers", numWorkersPerGroup)
             times[numWorkersPerGroup] = {}
-            num_tasks = get_num_runfirst_rank0(proc)
-            num_worker_run = 0
+
+            #num_tasks = get_num_runfirst_rank0(proc) #works only w/ dynamic task assignment
             time_run_all = 0.
-            times[numWorkersPerGroup]["run all tasks"] = []
             for i in proc[data]["events"]:
                 if i not in times[numWorkersPerGroup]:
                     times[numWorkersPerGroup][i] = []
                 for j in proc[data]["events"][i]:
                     duration = j[1] - j[0]
                     times[numWorkersPerGroup][i].append(duration)
-                    if i == "worker run":
-                        num_worker_run += 1
-                        time_run_all += duration
-                        # every time we have n_tasks "worker run" events,
-                        # add a new duration for "run all tasks"
-                        if (num_worker_run % num_tasks == 0):
-                            times[numWorkersPerGroup]["run all tasks"].append(time_run_all)
-                            time_run_all = 0
                 # remove first combination, because it makes weird things happen on NG
                 # remove last combination, as it might have used more subspaces
                 if i == "combine" or i == "manager combine":
                     times[numWorkersPerGroup][i] = times[numWorkersPerGroup][i][1:-1]
+                elif i == "worker run":
+                    times[numWorkersPerGroup][i] = times[numWorkersPerGroup][i][1:]
             if (rank < len(proc)-1):
+                num_worker_run = len(times[numWorkersPerGroup]["worker run"])
                 assert (num_worker_run > 0)
-                assert (num_worker_run % num_tasks == 0)
-                # print (len(times[numWorkersPerGroup]["run all tasks"]), len(times[numWorkersPerGroup]["combine"]))
-                assert (len(times[numWorkersPerGroup]["run all tasks"]) == len(
+                print (len(times[numWorkersPerGroup]["worker run"]), len(times[numWorkersPerGroup]["combine"]))
+                assert (len(times[numWorkersPerGroup]["worker run"]) == len(
                     times[numWorkersPerGroup]["combine"]) + 1)
                 # remove first run, because it may have init times
-                times[numWorkersPerGroup]["run all tasks"] = times[numWorkersPerGroup]["run all tasks"][1:-1]
+                #times[numWorkersPerGroup]["run all tasks"] = times[numWorkersPerGroup]["run all tasks"][1:-1]
             # print(num_worker_run, num_tasks)
         except Exception as err:
             raise err
@@ -249,8 +242,12 @@ if __name__ == "__main__":
     # print("4 (max total-times of all processes),")
     # print("5 (average time process groups)")
     # plot_type = int(input("\n"))
-    
+   
     times = get_rank_times_from_json(proc, -1)
+
+    print_mean_std(times)
+ 
+    times = get_rank_times_from_json(proc, 0)
     
     # colors = color_pool(proc[0])
     colors = color_pool_from_event_list(["combine", "run all tasks"])
@@ -265,3 +262,4 @@ if __name__ == "__main__":
     
     plt.tight_layout()
     plt.show()
+
