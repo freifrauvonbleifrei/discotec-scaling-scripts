@@ -204,16 +204,16 @@ def get_rank_times_from_json(procs, rank_passed=0):
                     times[numWorkersPerGroup][i].append(duration)
                 # remove first combination, because it makes weird things happen on NG
                 # remove last combination, as it might have used more subspaces
-                if i == "combine" or i == "manager combine":
+                if i == "worker combine" or i == "combine" or i == "manager combine":
                     times[numWorkersPerGroup][i] = times[numWorkersPerGroup][i][1:-1]
                 elif i == "worker run":
                     times[numWorkersPerGroup][i] = times[numWorkersPerGroup][i][1:]
             if (rank < len(proc)-1):
                 num_worker_run = len(times[numWorkersPerGroup]["worker run"])
                 assert (num_worker_run > 0)
-                print (len(times[numWorkersPerGroup]["worker run"]), len(times[numWorkersPerGroup]["combine"]))
+                #print (len(times[numWorkersPerGroup]["worker run"]), len(times[numWorkersPerGroup]["worker combine"]))
                 assert (len(times[numWorkersPerGroup]["worker run"]) == len(
-                    times[numWorkersPerGroup]["combine"]) + 1)
+                    times[numWorkersPerGroup]["worker combine"]) + 1)
                 # remove first run, because it may have init times
                 #times[numWorkersPerGroup]["run all tasks"] = times[numWorkersPerGroup]["run all tasks"][1:-1]
             # print(num_worker_run, num_tasks)
@@ -255,8 +255,8 @@ if __name__ == "__main__":
     # colors = color_pool_from_event_list(["combine"])
     
     print_mean_std(times)
-    print_maxtime(times, "manager combine")
-    print_mintime(times, "manager combine")
+    #print_maxtime(times, "manager combine")
+    #print_mintime(times, "manager combine")
  
     bar_plot_worker_group_managers(times, colors, True)
     
