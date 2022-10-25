@@ -1,0 +1,17 @@
+[ct]
+dim = 6
+lmin = 
+lmax = 
+leval = 
+p = 
+ncombi = 12
+ctscheme = 
+
+[application]
+dt = 1e-7
+nsteps = 1
+mcerror = 0
+
+[manager]
+ngroup = 
+nprocs = 

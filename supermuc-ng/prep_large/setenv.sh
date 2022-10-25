@@ -8,7 +8,6 @@ LIB_GLPK=$SGPP_DIR/glpk/lib/
 
 export LD_LIBRARY_PATH=$SGPP_DIR/lib/sgpp:$LIB_GLPK:$LIB_BOOST_DIR:$LD_LIBRARY_PATH
 
-module load intel-oneapi-compilers/2021.4.0 intel-mpi intel-mkl intel
 module load python/3.8.11-extended
 #module unload intel-mpi intel-mkl intel
 #module load intel-parallel-studio/cluster.2020.2 
