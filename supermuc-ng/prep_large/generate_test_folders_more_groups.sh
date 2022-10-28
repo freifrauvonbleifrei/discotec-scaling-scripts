@@ -16,9 +16,10 @@ ncombi=12
 
 runfile="run.sh"
 
-for i in {0..6}; do # consider doing {0..14} -> up to 16384 procs/PG
-	echo $i
-	FOLDER=${i}_weak_1_group
+for i in {1..5}; do # consider doing {0..14} -> up to 16384 procs/PG
+        TWO_TO_I=$((2 ** i))
+	echo $TWO_TO_I
+        FOLDER=0_weak_${TWO_TO_I}_group
 	mkdir $FOLDER
 
 	# executable symlink to new directory
@@ -37,16 +38,6 @@ for i in {0..6}; do # consider doing {0..14} -> up to 16384 procs/PG
 	lmax=(18 18 18 18 18 18)
         p=(1 3 3 3 3 3)
 
-	for (( j=0; j<$i; j++ )) do
-		# echo ADD_ARRAY ${ADD_ARRAY[@]}
-		k=$(( ($j  % 6) ))
-		ADD_ARRAY[$k]=$((ADD_ARRAY[$k] + 1))
-		lmin[$k]=$((lmin[$k] + 1))
-		lmax[$k]=$((lmax[$k] + 1))
-		p[$k]=$((p[$k] + 2))
-	done
-	#echo ADD_ARRAY ${ADD_ARRAY[@]}
-	#echo p ${p[@]}
     	processes_per_group=1
     	for p_k in "${p[@]}"; do
         	((processes_per_group *= p_k))
@@ -56,7 +47,7 @@ for i in {0..6}; do # consider doing {0..14} -> up to 16384 procs/PG
 	leval=(3 3 3 3 3 3)
 	leval=${leval[@]}
 	p=${p[@]}
-	ngroup=1
+	ngroup=${TWO_TO_I}
 	nprocs=${processes_per_group}
 
 	sed -i "s/lmin.*/lmin = $lmin/g" $paramfile
@@ -71,7 +62,7 @@ for i in {0..6}; do # consider doing {0..14} -> up to 16384 procs/PG
 	nprocs=$(grep nprocs $paramfile | awk -F"=" '{print $2}')
 
 	#link combination scheme file and use it in parameters
-	for j in ../../../twosystem_largest/${i}_*split1_42groups.json ; do
+	for j in ../../../twosystem_largest/0_*split1_42groups.json ; do
 		echo scheme $j
 		ln -s $j
 		scheme_name=$(basename $j)
@@ -101,6 +92,6 @@ for i in {0..6}; do # consider doing {0..14} -> up to 16384 procs/PG
 	
 
 	#submit
-	echo "created $i $processes_per_group"
+	echo "created $TWO_TO_I times $processes_per_group"
 	cd -
 done
