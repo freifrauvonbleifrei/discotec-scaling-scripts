@@ -154,6 +154,18 @@ def print_mintime(times, event):
         mintime = np.min(times[t][event])
         print("minimum", t, ",", event, ",", mintime)
 
+def print_csv(times, event_list):
+    event_string = ""
+    for event in event_list:
+        event_string += ", mean_" + event.replace(" ", "_") + ", std_" + event.replace(" ", "_") 
+    print("t" + event_string)
+    for t in times:
+        times_string = str(t)
+        for event in event_list:
+            mean = np.mean(times[t][event])
+            std = np.std(times[t][event])
+            times_string += ", " + str(mean) + ", " + str(std)
+        print(times_string)
 
 def get_num_workers_per_group(proc):
     group = int(proc["rank0"]["attributes"]["group"])
@@ -243,20 +255,22 @@ if __name__ == "__main__":
     # print("5 (average time process groups)")
     # plot_type = int(input("\n"))
    
-    times = get_rank_times_from_json(proc, -1)
-
-    print_mean_std(times)
+    manager_times = get_rank_times_from_json(proc, -1)
+    print_mean_std(manager_times)
  
     times = get_rank_times_from_json(proc, 0)
     
     # colors = color_pool(proc[0])
-    colors = color_pool_from_event_list(["combine", "run all tasks"])
-    colors = color_pool_from_event_list(["manager combine", "manager run"])
+    colors = color_pool_from_event_list(["worker combine", "worker run"])
+    events_manager = ["manager combine", "manager run"]
+    colors_manager = color_pool_from_event_list(events_manager)
     # colors = color_pool_from_event_list(["combine"])
     
     print_mean_std(times)
     #print_maxtime(times, "manager combine")
     #print_mintime(times, "manager combine")
+
+    print_csv(manager_times, events_manager)
  
     bar_plot_worker_group_managers(times, colors, True)
     
