@@ -35,7 +35,7 @@ for i in {0..6}; do # consider doing {0..14} -> up to 16384 procs/PG
 	ADD_ARRAY=(0 0 0 0 0 0)
 	lmin=(1 1 1 1 1 1)
 	lmax=(18 18 18 18 18 18)
-        p=(3 3 3 3 3 3)
+        p=(1 3 3 3 3 3)
 
 	for (( j=0; j<$i; j++ )) do
 		# echo ADD_ARRAY ${ADD_ARRAY[@]}
@@ -71,7 +71,7 @@ for i in {0..6}; do # consider doing {0..14} -> up to 16384 procs/PG
 	nprocs=$(grep nprocs $paramfile | awk -F"=" '{print $2}')
 
 	#link combination scheme file and use it in parameters
-	for j in ../../../twosystem_largest/${i}_*split1*.json ; do
+	for j in ../../../twosystem_largest/${i}_*split1_35groups.json ; do
 		echo scheme $j
 		ln -s $j
 		scheme_name=$(basename $j)
