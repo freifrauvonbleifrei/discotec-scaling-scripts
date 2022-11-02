@@ -10,7 +10,7 @@ import matplotlib.ticker as ticker
 import matplotlib.pyplot as plt
 import numpy as np
 from itertools import cycle
-from plot_weak_scaling import print_mean_std, print_maxtime, print_mintime
+from plot_scaling_by_process_group_size import print_mean_std, print_maxtime, print_mintime
 
 # list of distinguishable colors, see:
 # https://graphicdesign.stackexchange.com/revisions/3815/8
