@@ -62,7 +62,7 @@ for i in {1..5}; do # consider doing {0..14} -> up to 16384 procs/PG
 	nprocs=$(grep nprocs $paramfile | awk -F"=" '{print $2}')
 
 	#link combination scheme file and use it in parameters
-	for j in ../../../twosystem_largest/0_*split1_42groups.json ; do
+	for j in ../../../twosystem_largest/0_*split1_48groups.json ; do
 		echo scheme $j
 		ln -s $j
 		scheme_name=$(basename $j)

@@ -25,7 +25,7 @@ for i in {0..6}; do
 	lmin=${lmin[@]}
 	lmax=${lmax[@]}
 
-	python3 create_large_assigned_schemes.py --lmin $lmin --lmax $lmax --num_groups 18 20
+	python3 create_large_assigned_schemes.py --lmin $lmin --lmax $lmax --num_groups 48 48
 
 	for s in scheme*json; do
 		mv ${s} ${i}_${s}
