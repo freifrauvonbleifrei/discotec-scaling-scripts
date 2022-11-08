@@ -158,13 +158,14 @@ def print_csv(times, event_list):
     event_string = ""
     for event in event_list:
         event_string += ", mean_" + event.replace(" ", "_") + ", std_" + event.replace(" ", "_") 
-    print("t" + event_string)
+    print("t, num_runs" + event_string)
     for t in times:
         times_string = str(t)
+        times_string += ", " + str(min([len(times[t][event]) for event in event_list]))
         for event in event_list:
             mean = np.mean(times[t][event])
             std = np.std(times[t][event])
-            times_string += ", " + str(mean) + ", " + str(std)
+            times_string +=  ", " + str(mean) + ", " + str(std)
         print(times_string)
 
 def get_num_workers_per_group(proc):
@@ -225,7 +226,9 @@ def get_rank_times_from_json(procs, rank_passed=0):
                 assert (num_worker_run > 0)
                 #print (len(times[numWorkersPerGroup]["worker run"]), len(times[numWorkersPerGroup]["worker combine"]))
                 assert (len(times[numWorkersPerGroup]["worker run"]) == len(
-                    times[numWorkersPerGroup]["worker combine"]) + 1)
+                    times[numWorkersPerGroup]["worker combine"]) + 1 or 
+                    len(times[numWorkersPerGroup]["worker run"]) == 
+                    len(times[numWorkersPerGroup]["worker combine"]) + 2)
                 # remove first run, because it may have init times
                 #times[numWorkersPerGroup]["run all tasks"] = times[numWorkersPerGroup]["run all tasks"][1:-1]
             # print(num_worker_run, num_tasks)

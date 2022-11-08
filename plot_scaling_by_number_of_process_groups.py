@@ -10,7 +10,7 @@ import matplotlib.ticker as ticker
 import matplotlib.pyplot as plt
 import numpy as np
 from itertools import cycle
-from plot_scaling_by_process_group_size import print_mean_std, print_maxtime, print_mintime
+from plot_scaling_by_process_group_size import print_csv, print_mean_std, print_maxtime, print_mintime
 
 # list of distinguishable colors, see:
 # https://graphicdesign.stackexchange.com/revisions/3815/8
@@ -213,7 +213,7 @@ def get_times_from_json(procs, ranks_to_get_times_from=[]):
                                 time_run_all = 0
                         event_no += 1
                     # remove last combination, as it might have used more subspaces
-                    if i == "combine":
+                    if i == "worker combine" or i == "combine" or i == "manager combine":
                         times[numGroups][i] = times[numGroups][i][:-1]
 
                 if ranks_to_get_times_from != [-1]:
@@ -254,19 +254,22 @@ if __name__ == "__main__":
     # plot_type = int(input("\n"))
     
     # use manager rank (-1)
-    times = get_times_from_json(proc, [-1])
-    print_mean_std(times)
-    print_maxtime(times, "manager combine")
-    print_mintime(times, "manager combine")
+    manager_times = get_times_from_json(proc, [-1])
+    print_mean_std(manager_times)
+    print_maxtime(manager_times, "manager combine")
+    print_mintime(manager_times, "manager combine")
 
 
     # colors = color_pool(proc[0])
     colors = color_pool_from_event_list(["combine", "run all tasks"])
     # colors = color_pool_from_event_list(["combine"])
-    colors = color_pool_from_event_list(["manager combine", "manager run"])
-    colors = color_pool_from_event_list(["manager run"])
+    events_manager = ["manager combine", "manager run"]
+    colors = color_pool_from_event_list(events_manager)
+    #colors = color_pool_from_event_list(["manager run"])
 
-    bar_plot_worker_group_managers(times, colors, True)
+    print_csv(manager_times, events_manager)
+
+    bar_plot_worker_group_managers(manager_times, colors, True)
     
     plt.tight_layout()
     plt.show()
