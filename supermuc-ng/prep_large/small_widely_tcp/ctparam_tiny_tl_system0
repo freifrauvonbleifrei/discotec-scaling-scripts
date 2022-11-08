@@ -1,22 +1,24 @@
 [ct]
 dim = 2
-lmin = 3 3
-lmax = 10 10
+lmin = 3 4
+lmax = 10 11
 leval = 5 5
-p = 3 3
+p = 3 2
 ncombi = 10
 
 [application]
 dt = 1e-4
-nsteps = 10
-mcerror = 0
+nsteps = 1
+mcerror = 1
 
 [manager]
-ngroup = 1
-nprocs = 9
+ngroup = 2 
+nprocs = 6
 
 [thirdLevel]
 host = localhost
 port = 9999
 systemNumber = 0
 numSystems = 2
+extraSparseGrid = 0
+brokerOnSameSystem = 1

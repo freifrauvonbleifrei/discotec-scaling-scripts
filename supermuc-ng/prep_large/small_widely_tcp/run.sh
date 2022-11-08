@@ -1,6 +1,6 @@
 #!/bin/bash
 # Job Name and Files (also --job-name)
-#SBATCH -J small_widely_tcp 
+#SBATCH -J small_widely_tcp_with_broker 
 #Output and error (also --output, --error):
 #SBATCH -o ./%x.%j.out
 #SBATCH -e ./%x.%j.err
@@ -11,9 +11,9 @@
 ##SBATCH --mail-user=insert_your_email_here
 # Wall clock limit:
 ##SBATCH --time=06:00:00
-#SBATCH --time=00:20:00
+#SBATCH --time=00:30:00
 #SBATCH --no-requeue
-#SBATCH --partition=micro
+#SBATCH --partition=test
 #Setup of execution environment
 #SBATCH --export=NONE 
 #SBATCH --account=pn34mi
@@ -23,7 +23,7 @@
 #SBATCH --ntasks-per-node=48
 
 ##fixed frequency, no dynamic adjustment
-###SBATCH --ear=off
+#SBATCH --ear=off
 #optional: keep job within one island
 #SBATCH --switches=1
 
@@ -36,6 +36,12 @@ if [ $# -ge 1 ] ; then
    paramfile=$1
 fi
 
+ngroup=$(grep ngroup $paramfile | awk -F"=" '{print $2}')
+nprocs=$(grep nprocs $paramfile | awk -F"=" '{print $2}')
+
+mpiprocs=$((ngroup*nprocs+1))
+
+
 # General
-mpiexec -n 1 ./manager_only $paramfile
+mpiexec -n "$mpiprocs" ./combi_example $paramfile : -n 1 ./thirdLevelManager broker.ini
 
