@@ -1,11 +1,11 @@
 
-module load python/3.8 # for scons
-module load boost/1.70.0 # for boost
-#module load intel/19.1.2
-#module switch mpt impi/19.1.2 # unnecessary -- mpt/2.23 loaded implicitly # for compiler
+. ./setenv.sh
 
 # for profiling and tracing with scoreP
 #. ./setenv_profile.sh
+
+# to clean the build
+scons -c && rm -r .scon*
 
 module list
 
@@ -17,7 +17,8 @@ export LD_LIBRARY_PATH=$(pwd)/lib/sgpp:$(pwd)/glpk/lib:$LD_LIBRARY_PATH
 
 cd distributedcombigrid/examples/distributed_third_level/
 make clean 
-make
+make combi_example
+make manager_only
 cd -
 
 #mpiexec.mpich -np 9 ./distributedcombigrid/tests/test_distributedcombigrid_boost --run_test=ftolerance
