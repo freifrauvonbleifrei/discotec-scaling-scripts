@@ -265,7 +265,7 @@ if __name__ == "__main__":
     
     # colors = color_pool(proc[0])
     colors = color_pool_from_event_list(["worker combine", "worker run"])
-    events_manager = ["manager combine", "manager run"]
+    events_manager = ["manager combine", "manager run", "manager write to disk", "manager read from disk"]
     colors_manager = color_pool_from_event_list(events_manager)
     # colors = color_pool_from_event_list(["combine"])
     
