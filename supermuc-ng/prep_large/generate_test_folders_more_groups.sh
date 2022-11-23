@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SGPP_DIR=/hppfs/work/pn34mi/di39qun2/DisCoTec-third-level/
+SGPP_DIR=/hppfs/work/pn34mi/di39qun2/DisCoTec-third-level-oneboundary/
 EXECUTABLE=${SGPP_DIR}/distributedcombigrid/examples/distributed_third_level/combi_example
 NNODESSYSTEM=48
 WALLTIME="00:40:00"
@@ -16,7 +16,7 @@ ncombi=12
 
 runfile="run.sh"
 
-for i in {1..5}; do # consider doing {0..14} -> up to 16384 procs/PG
+for i in {1..4}; do # consider doing {1..4}
         TWO_TO_I=$((2 ** i))
 	echo $TWO_TO_I
         FOLDER=0_weak_${TWO_TO_I}_group
@@ -35,8 +35,8 @@ for i in {1..5}; do # consider doing {0..14} -> up to 16384 procs/PG
 	
 	ADD_ARRAY=(0 0 0 0 0 0)
 	lmin=(1 1 1 1 1 1)
-	lmax=(18 18 18 18 18 18)
-        p=(1 3 3 3 3 3)
+	lmax=(17 17 17 17 17 17)
+        p=(2 2 2 2 2 2)
 
     	processes_per_group=1
     	for p_k in "${p[@]}"; do
@@ -62,7 +62,7 @@ for i in {1..5}; do # consider doing {0..14} -> up to 16384 procs/PG
 	nprocs=$(grep nprocs $paramfile | awk -F"=" '{print $2}')
 
 	#link combination scheme file and use it in parameters
-	for j in ../../../twosystem_largest/0_*split1_48groups.json ; do
+	for j in ../../../twosystem_largest/0_*split1_23groups.json ; do
 		echo scheme $j
 		ln -s $j
 		scheme_name=$(basename $j)
@@ -93,5 +93,5 @@ for i in {1..5}; do # consider doing {0..14} -> up to 16384 procs/PG
 
 	#submit
 	echo "created $TWO_TO_I times $processes_per_group"
-	cd -
+        cd -
 done

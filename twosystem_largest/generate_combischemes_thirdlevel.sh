@@ -6,11 +6,11 @@ git clone git@github.com:SGpp/DisCoTec-combischeme-utilities.git
 
 cd DisCoTec-combischeme-utilities
 
-for i in {0..6}; do
+for i in {0..8}; do
 	ADD_ARRAY=(0 0 0 0 0 0)
 	lmin=(1 1 1 1 1 1)
-	lmax=(18 18 18 18 18 18)
-        p=(3 3 3 3 3 3)
+	lmax=(17 17 17 17 17 17)
+        p=(2 2 2 2 2 2)
 
 	for (( j=0; j<$i; j++ )) do
 		# echo ADD_ARRAY ${ADD_ARRAY[@]}
@@ -25,7 +25,7 @@ for i in {0..6}; do
 	lmin=${lmin[@]}
 	lmax=${lmax[@]}
 
-	python3 create_large_assigned_schemes.py --lmin $lmin --lmax $lmax --num_groups 48 48
+	python3 create_large_assigned_schemes.py --lmin $lmin --lmax $lmax --num_groups 23 20 
 
 	for s in scheme*json; do
 		mv ${s} ${i}_${s}

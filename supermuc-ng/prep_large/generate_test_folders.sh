@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SGPP_DIR=/hppfs/work/pn34mi/di39qun2/DisCoTec-third-level/
+SGPP_DIR=/hppfs/work/pn34mi/di39qun2/DisCoTec-third-level-oneboundary/
 EXECUTABLE=${SGPP_DIR}/distributedcombigrid/examples/distributed_third_level/combi_example
 NNODESSYSTEM=48
 WALLTIME="00:40:00"
@@ -16,7 +16,7 @@ ncombi=12
 
 runfile="run.sh"
 
-for i in {0..6}; do # consider doing {0..14} -> up to 16384 procs/PG
+for i in {0..8}; do # consider doing {0..8} -> up to 16384 procs/PG
 	echo $i
 	FOLDER=${i}_weak_1_group
 	mkdir $FOLDER
@@ -34,8 +34,8 @@ for i in {0..6}; do # consider doing {0..14} -> up to 16384 procs/PG
 	
 	ADD_ARRAY=(0 0 0 0 0 0)
 	lmin=(1 1 1 1 1 1)
-	lmax=(18 18 18 18 18 18)
-        p=(1 3 3 3 3 3)
+	lmax=(17 17 17 17 17 17)
+        p=(2 2 2 2 2 2)
 
 	for (( j=0; j<$i; j++ )) do
 		# echo ADD_ARRAY ${ADD_ARRAY[@]}
@@ -43,7 +43,7 @@ for i in {0..6}; do # consider doing {0..14} -> up to 16384 procs/PG
 		ADD_ARRAY[$k]=$((ADD_ARRAY[$k] + 1))
 		lmin[$k]=$((lmin[$k] + 1))
 		lmax[$k]=$((lmax[$k] + 1))
-		p[$k]=$((p[$k] + 2))
+		p[$k]=$((p[$k] * 2))
 	done
 	#echo ADD_ARRAY ${ADD_ARRAY[@]}
 	#echo p ${p[@]}
@@ -71,7 +71,7 @@ for i in {0..6}; do # consider doing {0..14} -> up to 16384 procs/PG
 	nprocs=$(grep nprocs $paramfile | awk -F"=" '{print $2}')
 
 	#link combination scheme file and use it in parameters
-	for j in ../../../twosystem_largest/${i}_*split1_48groups.json ; do
+	for j in ../../../twosystem_largest/${i}_*split1_23groups.json ; do
 		echo scheme $j
 		ln -s $j
 		scheme_name=$(basename $j)
@@ -102,5 +102,5 @@ for i in {0..6}; do # consider doing {0..14} -> up to 16384 procs/PG
 
 	#submit
 	echo "created $i $processes_per_group"
-	cd -
+        cd -
 done
