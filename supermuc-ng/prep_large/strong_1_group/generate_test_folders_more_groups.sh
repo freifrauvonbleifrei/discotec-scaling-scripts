@@ -16,22 +16,14 @@ ncombi=12
 
 runfile="run.sh"
 
-for i in {0..14}; do 
-	echo $i
+for i in {1..5}; do 
+        TWO_TO_I=$((2 ** i))
+	echo $TWO_TO_I
+        FOLDER=strong_64_x_${TWO_TO_I}_group
 	
-	ADD_ARRAY=(0 0 0 0 0 0)
 	lmin=(4 4 4 4 8 8)
 	lmax=(18 18 18 18 19 19)
-        p=(1 1 1 1 1 1)
-
-	for (( j=0; j<$i; j++ )) do
-		# echo ADD_ARRAY ${ADD_ARRAY[@]}
-		k=$(( ($j  % 6) ))
-		ADD_ARRAY[$k]=$((ADD_ARRAY[$k] + 1))
-		p[$k]=$((p[$k] * 2))
-	done
-	#echo ADD_ARRAY ${ADD_ARRAY[@]}
-	#echo p ${p[@]}
+        p=(2 2 2 2 2 2)
     	processes_per_group=1
     	for p_k in "${p[@]}"; do
         	((processes_per_group *= p_k))
@@ -44,7 +36,6 @@ for i in {0..14}; do
 	ngroup=1
 	nprocs=${processes_per_group}
 
-	FOLDER=strong_${processes_per_group}_x_1_group
         mkdir $FOLDER
 
         # executable symlink to new directory
