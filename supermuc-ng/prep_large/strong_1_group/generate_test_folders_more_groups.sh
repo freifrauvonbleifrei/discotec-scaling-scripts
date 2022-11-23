@@ -33,7 +33,7 @@ for i in {1..5}; do
 	leval=(3 3 3 3 3 3)
 	leval=${leval[@]}
 	p=${p[@]}
-	ngroup=1
+	ngroup=${TWO_TO_I}
 	nprocs=${processes_per_group}
 
         mkdir $FOLDER
