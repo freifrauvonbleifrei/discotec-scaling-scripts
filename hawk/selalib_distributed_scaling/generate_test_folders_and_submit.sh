@@ -1,7 +1,7 @@
 #!/bin/bash
 
-SGPP_DIR=/lustre/hpe/ws10/ws10.1/ws/ipvpolli-widely/DisCoTec-selalib/
-EXECUTABLE=${SGPP_DIR}/distributedcombigrid/examples/selalib_distributed/selalib_distributed
+SGPP_DIR=/lustre/hpe/ws10/ws10.1/ws/ipvpolli-widely-distributed-ct/DisCoTec-for-selalib/
+EXECUTABLE=${SGPP_DIR}/examples/selalib_distributed/selalib_distributed_workers_only
 NNODESSYSTEM=128
 WALLTIME="00:40:00"
 
@@ -17,7 +17,7 @@ ncombi=12
 
 runfile="run.sh"
 
-declare -a BasisFunctions=("hat" "biorthogonal_periodic" "fullweighting_periodic")
+declare -a BasisFunctions=("hat_periodic" "biorthogonal_periodic" "fullweighting_periodic")
 
 # Iterate the string array using for loop
 for basisfunction in ${BasisFunctions[@]}; do
@@ -76,7 +76,7 @@ for basisfunction in ${BasisFunctions[@]}; do
 	cp $runfile $FOLDER
 	cd $FOLDER
 	
-	MPIPROCS=$((ngroup*nprocs+1))
+	MPIPROCS=$((ngroup*nprocs))
 	(( NNODES=(MPIPROCS+NNODESSYSTEM-1)/NNODESSYSTEM ))
 	
 	##PBS -N weak

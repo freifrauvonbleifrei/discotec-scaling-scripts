@@ -1,7 +1,7 @@
 #!/bin/bash
 
-SGPP_DIR=/lustre/hpe/ws10/ws10.1/ws/ipvpolli-widely/DisCoTec-selalib/
-EXECUTABLE=${SGPP_DIR}/distributedcombigrid/examples/selalib_distributed/selalib_distributed
+SGPP_DIR=/lustre/hpe/ws10/ws10.1/ws/ipvpolli-widely-distributed-ct/DisCoTec-for-selalib/
+EXECUTABLE=${SGPP_DIR}/examples/selalib_distributed/selalib_distributed_workers_only
 NNODESSYSTEM=128
 WALLTIME="00:40:00"
 
@@ -17,11 +17,11 @@ ncombi=12
 
 runfile="run.sh"
 
-declare -a BasisFunctions=("hat" "biorthogonal_periodic" "fullweighting_periodic")
+declare -a BasisFunctions=("hat_periodic" "biorthogonal_periodic" "fullweighting_periodic")
 
 # Iterate the string array using for loop
 for basisfunction in ${BasisFunctions[@]}; do
-   for i in {2..8}; do # consider doing {1..8} 
+   for i in {3..8}; do # consider doing {1..8} 
 	TWO_TO_I=$((2 ** i))
 	echo $TWO_TO_I
 	FOLDER=strong_32x${TWO_TO_I}_${basisfunction}
@@ -73,7 +73,7 @@ for basisfunction in ${BasisFunctions[@]}; do
 	# do not replace number of ranks, we need to have all of the node anyways
 	cp $runfile $FOLDER
 	cd $FOLDER
-	MPIPROCS=$((ngroup*nprocs+1))
+	MPIPROCS=$((ngroup*nprocs))
 	(( NNODES=(MPIPROCS+NNODESSYSTEM-1)/NNODESSYSTEM ))
 	
 	##PBS -N weak
